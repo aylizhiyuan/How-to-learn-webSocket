@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+由于低版本的IE不允许在XHR的readyState为3的时候获取其responseText属性，为了达到在IE上使用这个技术，又出现了基于iframe的数据流通信方式。具体来讲，就是在浏览器中动态载入一个iframe,让它的src属性指向请求的服务器的URL，实际上就是向服务器发送了一个http请求，然后在浏览器端创建一个处理数据的函数，在服务端通过iframe与浏览器的长连接定时输出数据给客户端，但是这个返回的数据并不是一般的数据，而是一个类似于script type=\"text/javascript\">parent.process('"+randomNum.toString()+"')脚本执行的方式，浏览器接收到这个数据就会将它解析成js代码并找到页面上指定的函数去执行，实际上是服务端间接使用自己的数据间接调用了客户端的代码，达到实时更新客户端的目的。
+</body>
+</html>
+<script>
+    function process(data){
+        console.log(data);
+    }
+    var dataStream = function(url){
+        var ifr = document.createElement('iframe');
+        ifr.src = url;
+        document.body.appendChild(ifr);
+    }
+    dataStream('http://localhost:8088/htmlfile');
+</script>

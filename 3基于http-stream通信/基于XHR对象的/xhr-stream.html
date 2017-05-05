@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+上面的long-polling技术为了保持客户端与服务端的长连接采取的是服务端阻塞（保持响应不返回），客户端轮询的方式，在Comet技术中（详细技术文章请参见《Comet技术详解：基于HTTP长连接的Web端实时通信技术》），还存在一种基于http-stream流的通信方式。其原理是让客户端在一次请求中保持和服务端连接不断开，然后服务端源源不断传送数据给客户端，就好比数据流一样，并不是一次性将数据全部发给客户端。它与polling方式的区别在于整个通信过程客户端只发送一次请求，然后服务端保持与客户端的长连接，并利用这个连接在回送数据给客户端。
+
+这种方案有分为几种不同的数据流传输方式。
+</body>
+</html>
+<script>
+    function createStreamClient(url,progress,done){
+        //received为接收到数据的计数器
+        var xhr=new XMLHttpRequest(),received=0;
+        xhr.open("get",url,true);
+        xhr.onreadystatechange=function(){
+            var result;
+            if(xhr.readyState==3){
+                //console.log(xhr.responseText);
+                result=xhr.responseText.substring(received);
+                received+=result.length;
+                progress(result);
+            }else if(xhr.readyState==4){
+                done(xhr.responseText);
+            }
+        };
+        xhr.send(null);
+        return xhr;
+    }
+    var client = createStreamClient('http://localhost:8088/stream',function(data){
+        console.log('Received:' + data);
+    },function(data){
+        console.log('Done,the last data is:' + data);
+    })
+    //这里由于客户端收到的数据是分段发过来的，所以最好定义一个游标received，来获取最新数据而舍弃之前已经接收到的数据，通过这个游标每次将接收到的最新数据打印出来，并且在通信结束后打印出整个responseText。
+</script>

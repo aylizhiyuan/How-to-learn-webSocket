@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>服务器启动8088端口，客户端访问80端口</title>
+</head>
+<body>
+CORS（跨域资源共享）是一种允许浏览器脚本向出于不同域名下服务器发送请求的技术，它是在原生XHR请求的基础上，XHR调用open方法时，地址指向一个跨域的地址，在服务端通过设置'Access-Control-Allow-Origin':'*'响应头部告诉浏览器，发送的数据是一个来自于跨域的并且服务器允许响应的数据，浏览器接收到这个header之后就会绕过平常的跨域限制，从而和平时的XHR通信没有区别。该方法的主要好处是在于客户端代码不用修改，服务端只需要添加'Access-Control-Allow-Origin':'*'头部即可。适用于ff,safari,opera,chrome等非IE浏览器。跨域的XHR相比非跨域的XHR有一些限制，这是为了安全所需要的，主要有以下限制：
+
+
+客户端不能使用setRequestHeader设置自定义头部；
+不能发送和接收cookie；
+调用getAllResponseHeaders()方法总会返回空字符串。
+
+以上这些措施都是为了安全考虑，防止常见的跨站点脚本攻击（XSS）和跨站点请求伪造（CSRF）。
+</body>
+</html>
+<script>
+    function polling(){
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == 4){
+                if(xhr.status == 200){
+                    console.log(xhr.responseText);
+                }
+            }
+        }
+        xhr.open('get','http://localhost:8088/cors');
+        xhr.send(null);
+    }
+    setInterval(function(){
+        polling();
+    },1000)
+    //为了验证，需要将xhr.html这个文件放到wampserver的环境中，去请求nodeJS启动的端口号
+</script>

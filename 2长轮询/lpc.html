@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body>
+在上面的轮询解决方案中，由于每次都要发送一个请求，服务端不管数据是否发生变化都发送数据，请求完成后连接关闭。这中间经过的很多通信是不必要的，于是又出现了长轮询（long-polling）方式。这种方式是客户端发送一个请求到服务器，服务器查看客户端请求的数据是否发生了变化（是否有最新数据），如果发生变化则立即响应返回，否则保持这个连接并定期检查最新数据，直到发生了数据更新或连接超时。同时客户端连接一旦断开，则再次发出请求，这样在相同时间内大大减少了客户端请求服务器的次数。代码如下。
+</body>
+</html>
+<script>
+    function createXHR(){
+        if(typeof XMLHttpRequest !='undefined'){
+            return new XMLHttpRequest();
+        }else if(typeof ActiveXObject !='undefined' ){
+            if(typeof arguments.callee.activeXString!="string"){
+                var versions=["MSXML2.XMLHttp.6.0","MSXML2.XMLHttp.3.0",
+                        "MSXML2.XMLHttp"],
+                    i,len;
+                for(i=0,len=versions.length;i<len;i++){
+                    try{
+                        new ActiveXObject(versions[i]);
+                        arguments.callee.activeXString=versions[i];
+                        break;
+                    }catch(ex) {
+
+                    }
+                }
+            }
+            return new ActiveXObject(arguments.callee.activeXString);
+        }else{
+            throw new Error("no xhr object available");
+        }
+    }
+    function longPolling(url,method,data){
+        method = method || 'get';
+        data = data || null;
+        var xhr = createXHR();
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == 4){
+                if(xhr.status >= 200 && xhr.status < 300 || xhr.status == 304){
+                    console.log(xhr.responseText);
+                }else{
+                    console.log('fail');
+                }
+                longPolling(url,method,data);
+            }
+        }
+        xhr.open(method,url,true);
+        xhr.send(data);
+    }
+    longPolling('http://localhost:8088/time','get');
+
+</script>

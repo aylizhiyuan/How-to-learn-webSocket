@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+这种方式不需要在服务端添加Access-Control-Allow-Origin头信息，其原理是利用HTML页面上script标签对跨域没有限制的特点，让它的src属性指向服务端请求的地址，其实是通过script标签发送了一个http请求，服务器接收到这个请求之后，返回的数据是自己的数据加上对客户端JS函数的调用，其原理类似于我们上面所说的iframe流的方式，客户端浏览器接收到返回的脚本调用会解析执行，从而达到更新界面的目的。
+</body>
+</html>
+<script>
+    function callback(data){
+        console.log("获得的跨域数据为:"+data);
+    }
+    function sendJsonp(url){
+        var oScript=document.createElement("script");
+        oScript.src=url;
+        oScript.setAttribute('type',"text/javascript");
+        document.getElementsByTagName('head')[0].appendChild(oScript);
+    }
+    setInterval(function(){
+        sendJsonp('http://localhost:8088/jsonp?cb=callback');
+    },1000);
+</script>
